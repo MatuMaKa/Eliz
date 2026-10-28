@@ -1,0 +1,13 @@
+module com.matumaka.greeter.utils;
+
+public class Greeter {
+    let name String;
+
+    public fn init(name: String) {
+        this.name = name;
+    }
+
+    public fn greet() {
+        print("Hello, " + this.name + "!");
+    }
+}

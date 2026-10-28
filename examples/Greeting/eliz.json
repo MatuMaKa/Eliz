@@ -1,0 +1,7 @@
+{
+    "name": "Greeting",
+    "version": "1.0",
+    "description": "A simple greeting example for Eliz.",
+    "source": "src",
+    "main": "com.matumaka.greeter.Main"
+}

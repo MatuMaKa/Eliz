@@ -1,0 +1,8 @@
+module com.matumaka.greeter;
+
+public class Main {
+    public fn main() {
+        let greeter = new Greeter("MatuMaKa");
+        greeter.greet();
+    }
+}
