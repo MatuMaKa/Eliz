@@ -3,7 +3,8 @@
 # Eliz
 A custom programming language combining Java &amp; Python
 
-A video will be posted on https://www.youtube.com/@citzeh_lover22
+> [!TIP]
+> Videos regarding this will be posted on https://www.youtube.com/@citzeh_lover22
 
 ## To-Do List
 
