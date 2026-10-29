@@ -51,6 +51,7 @@ class IfStatement(Statement):
     condition: Expression
     then_branch: list[Statement]
     else_branch: list[Statement] | None = None
+    elif_branch: IfStatement | None = None
 
 @dataclass
 class WhileStatement(Statement):

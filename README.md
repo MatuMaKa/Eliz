@@ -15,8 +15,8 @@ A custom programming language combining Java &amp; Python
 - [ ] Constructors using init()
 - [ ] Instance fields and the this keyword
 - [ ] Property access and method calls, such as greeter.greet()
-- [ ] For loops
-- [ ] else if branches
+- [x] For loops
+- [x] else if branches
 - [ ] Correct short-circuit behavior for and/or
 - [ ] Consistent type checking for assignments and function arguments
 - [ ] Return-value handling and errors for invalid function calls

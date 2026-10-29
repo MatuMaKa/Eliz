@@ -18,6 +18,7 @@ class TokenType(Enum):
     THIS = auto()
     IF = auto()
     ELSE = auto()
+    ELIF = auto()
     WHILE = auto()
     FOR = auto()
     RETURN = auto()

@@ -24,6 +24,9 @@ class Parser:
         if self._match(TokenType.WHILE):
             return self._parse_while_statement()
 
+        if self._match(TokenType.FOR):
+            return self._parse_for_statement()
+
         expression = self._parse_expression()
 
         if self._match(TokenType.ASSIGN):
@@ -43,6 +46,36 @@ class Parser:
 
         self._match(TokenType.SEMICOLON)
         return ast.ExpressionStatement(expression)
+
+    def _parse_for_statement(self) -> ast.ForStatement:
+        self._consume(
+            TokenType.LEFT_PAREN,
+            "Expected '(' after for."
+            )
+
+        initializer = None
+        if self._match(TokenType.LET):
+            initializer = self._parse_variable_declaration()
+        elif not self._check(TokenType.SEMICOLON):
+            initializer = self._parse_for_clause()
+        else:
+            self._advance()
+
+        condition = None
+        if not self._check(TokenType.SEMICOLON):
+            condition = self._parse_expression()
+
+        self._consume(TokenType.SEMICOLON, "Expected ';' after condition.")
+
+        increment = None
+        if not self._check(TokenType.RIGHT_PAREN):
+            increment = self._parse_for_clause()
+
+        self._consume(TokenType.RIGHT_PAREN, "Expected ')' after for clauses.")
+        self._consume(TokenType.LEFT_BRACE, "Expected '{' before for body.")
+        body = self._parse_block()
+
+        return ast.ForStatement(initializer, condition, increment, body)
 
     def _parse_while_statement(self) -> ast.WhileStatement:
         condition = self._parse_expression()
@@ -64,15 +97,32 @@ class Parser:
 
         then_branch = self._parse_block()
 
+        elif_branch = None
         else_branch = None
-        if self._match(TokenType.ELSE):
+        if self._match(TokenType.ELIF):
+            elif_branch = self._parse_if_statement()
+
+        elif self._match(TokenType.ELSE):
             self._consume(
                 TokenType.LEFT_BRACE,
                 "Expected '{' after else."
             )
             else_branch = self._parse_block()
 
-        return ast.IfStatement(condition, then_branch, else_branch)
+        return ast.IfStatement(condition, then_branch, else_branch, elif_branch)
+
+    def _parse_for_clause(self) -> ast.Statement:
+        expression = self._parse_expression()
+
+        if self._match(TokenType.ASSIGN):
+            if not isinstance(expression, ast.Variable):
+                raise SyntaxError(
+                    "Invalid assignment target in for loop."
+                )
+            value = self._parse_expression()
+            return ast.Assignment(expression.name, value)
+
+        return ast.ExpressionStatement(expression)
 
     def _parse_block(self) -> list[ast.Statement]:
         statements = []
@@ -127,7 +177,7 @@ class Parser:
         return expression
 
     def _parse_and(self) -> ast.Expression:
-        expression = self._parse_equality
+        expression = self._parse_equality()
 
         while self._match(TokenType.AND):
             operator = self._previous().value

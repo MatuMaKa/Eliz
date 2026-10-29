@@ -22,10 +22,16 @@ class Interpreter:
     def _define_builtins(self) -> None:
         self.environment.define("print",
                                 self._builtin_print)
+        self.environment.define("garfield",
+                                self._builtin_garfield)
 
     @staticmethod
     def _builtin_print(*arguments: Any) -> None:
         print(*arguments)
+
+    @staticmethod
+    def _builtin_garfield(*arguments: Any) -> None:
+        print("Garfield activated UwU - Extra:", *arguments)
 
     def _execute(self, statement: ast.Statement) -> None:
         if isinstance(statement, ast.VariableDeclaration):
@@ -60,6 +66,8 @@ class Interpreter:
             if self._is_truthy(condition):
                 for child in statement.then_branch:
                     self._execute(child)
+            elif statement.elif_branch is not None:
+                self._execute(statement.elif_branch)
             elif statement.else_branch is not None:
                 for child in statement.else_branch:
                     self._execute(child)
@@ -69,6 +77,21 @@ class Interpreter:
             while self._is_truthy(self._evaluate(statement.condition)):
                 for child in statement.body:
                     self._execute(child)
+            return
+
+        if isinstance(statement, ast.ForStatement):
+            if statement.initializer is not None:
+                self._execute(statement.initializer)
+
+            while (
+                statement.condition is None
+                or self._is_truthy(self._evaluate(statement.condition))
+            ):
+                for child in statement.body:
+                    self._execute(child)
+
+                if statement.increment is not None:
+                    self._execute(statement.increment)
             return
 
         raise ElizRuntimeError(
@@ -83,7 +106,7 @@ class Interpreter:
             return self.environment.get(expression.name)
 
         if isinstance(expression, ast.UnaryExpression):
-            right = self._evalutate(expression.operand)
+            right = self._evaluate(expression.operand)
 
             if expression.operator == "-":
                 return -right
@@ -144,18 +167,18 @@ class Interpreter:
         if operator == ">=":
             return left >= right
         if operator in ("and", "&&"):
-            return self.is_truthy(left) and self._is_truthy(right)
+            return self._is_truthy(left) and self._is_truthy(right)
         if operator in ("or", "||"):
-            return self.is_truthy(left) or self._is_truthy(right)
+            return self._is_truthy(left) or self._is_truthy(right)
 
         raise ElizRuntimeError(
             f"Unknown binary operator '{operator}'"
         )
     
-@staticmethod
-def _is_truthy(value: Any) -> bool:
-    if value is None:
-        return False
-    if isinstance(value, bool):
-        return value
-    return bool(value)
+    @staticmethod
+    def _is_truthy(value: Any) -> bool:
+        if value is None:
+            return False
+        if isinstance(value, bool):
+            return value
+        return bool(value)
