@@ -1,3 +1,5 @@
+![banner](https://raw.githubusercontent.com/MatuMaKa/images/refs/heads/main/Eliz%20Assets/3000x720.png)
+
 # Eliz
 A custom programming language combining Java &amp; Python
 
