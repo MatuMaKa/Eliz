@@ -27,6 +27,16 @@ class Parser:
         if self._match(TokenType.FOR):
             return self._parse_for_statement()
 
+        if self._match(TokenType.PUBLIC):
+            self._consume(TokenType.FN, "Expected 'fn' after 'public'.")
+            return self._parse_function_declaration(is_public=True)
+
+        if self._match(TokenType.FN):
+            return self._parse_function_declaration()
+
+        if self._match(TokenType.RETURN):
+            return self._parse_return_statement()
+
         expression = self._parse_expression()
 
         if self._match(TokenType.ASSIGN):
@@ -135,6 +145,57 @@ class Parser:
             "Expected '}' after block."
         )
         return statements
+
+    def _parse_function_declaration(self, is_public: bool = False) -> ast.FunctionDeclaration:
+        name = self._consume(
+            TokenType.IDENTIFIER,
+            "Expected function name."
+        ).value
+
+        self._consume(TokenType.LEFT_PAREN, "Expected '(' after function name.")
+
+        parameters = []
+
+        if not self._check(TokenType.RIGHT_PAREN):
+            while True:
+                parameter_name = self._consume(
+                    TokenType.IDENTIFIER,
+                    "Expected parameter name."
+                ).value
+
+                type_name = None
+                if self._match(TokenType.COLON):
+                    type_name = self._consume(
+                        TokenType.IDENTIFIER,
+                        "Expected parameter type."
+                    ).value
+
+                parameters.append(ast.Parameter(parameter_name, type_name))
+
+                if not self._match(TokenType.COMMA):
+                    break
+
+        self._consume(TokenType.RIGHT_PAREN, "Expected ')' after parameters.")
+        self._consume(TokenType.LEFT_BRACE, "Expected '{' before function body.")
+
+        body = self._parse_block()
+
+        return ast.FunctionDeclaration(
+            name=name,
+            parameters=parameters,
+            body=body,
+            is_public=is_public
+        )
+
+    def _parse_return_statement(self) -> ast.ReturnStatement:
+        if self._check(TokenType.SEMICOLON):
+            self._advance()
+            return ast.ReturnStatement()
+
+        value = self._parse_expression()
+        self._consume(TokenType.SEMICOLON, "Expected ';' after return value.")
+
+        return ast.ReturnStatement(value)
 
     def _parse_variable_declaration(self) -> ast.VariableDeclaration:
         name = self._consume(

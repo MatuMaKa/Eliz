@@ -120,3 +120,15 @@ class SetExpression(Expression):
 @dataclass
 class BlockStatement(Statement):
     statements: list[Statement]
+
+@dataclass
+class Parameter(ASTNode):
+    name: str
+    type_name: str | None = None
+
+@dataclass
+class FunctionDeclaration(Statement):
+    name: str
+    parameters: list[Parameter]
+    body: list[Statement]
+    is_public: bool = False
