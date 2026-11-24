@@ -1,11 +1,16 @@
 from typing import Any, Callable
 
+class ReturnSignal(Exception):
+    def __init__(self, value: Any) -> None:
+        self.value = value
+
 class ElizFunction:
-    def __init__(self, name: str, parameters: list[str], body: list[Any], closure: Any, is_initializer: bool = False) -> None:
+    def __init__(self, name: str, parameters: list[str], body: list[Any], closure: Any, interpreter: Any, is_initializer: bool = False) -> None:
         self.name = name
         self.parameters = parameters
         self.body = body
         self.closure = closure
+        self.interpreter = interpreter
         self.is_initializer = is_initializer
 
     def bind(self, instance: "ElizInstance") -> "ElizFunction":
@@ -19,8 +24,42 @@ class ElizFunction:
             parameters=self.parameters,
             body=self.body,
             closure=env,
+            interpreter=self.interpreter,
             is_initializer=self.is_initializer
         )
+
+    def __call__(self, *args: Any) -> Any:
+        from eliz.runtime.environment import Environment
+        from eliz.errors.exceptions import ElizArgumentError
+
+        if len(args) != len(self.parameters):
+            raise ElizArgumentError(
+                f"Function '{self.name}' expects {len(self.parameters)} "
+                f"arguments, but received {len(args)}."
+            )
+
+        previous_env = self.interpreter.environment
+        env = Environment(previous_env)
+
+        for param, arg in zip(self.parameters, args):
+            env.define(param.name, arg)
+
+        self.interpreter.environment = env
+
+        try:
+            for statement in self.body:
+                self.interpreter._execute(statement)
+        except ReturnSignal as signal:
+            if self.is_initializer:
+                return self.closure.get("this")
+            return signal.value
+        finally:
+            self.interpreter.environment = previous_env
+
+        if self.is_initializer:
+            return self.closure.get("this")
+
+        return None
 
     def __repr__(self) -> str:
         return f"<fn {self.name}>"
@@ -38,7 +77,7 @@ class ElizClass:
         initializer = self.find_method("init")
 
         if initializer is not None:
-            initializer.bind(instance)
+            initializer.bind(instance)(*args)
 
         return instance
 

@@ -3,6 +3,7 @@ from typing import Any
 from eliz.frontend import ast_nodes as ast
 from eliz.runtime.environment import Environment
 from eliz.errors.exceptions import ElizRuntimeError
+from eliz.runtime.objects import ElizFunction, ReturnSignal
 
 class Interpreter:
     def __init__(self) -> None:
@@ -93,6 +94,24 @@ class Interpreter:
                 if statement.increment is not None:
                     self._execute(statement.increment)
             return
+
+        if isinstance(statement, ast.FunctionDeclaration):
+            function = ElizFunction(
+                name=statement.name,
+                parameters=statement.parameters,
+                body=statement.body,
+                closure=self.environment,
+                interpreter=self,
+            )
+            self.environment.define(statement.name, function)
+            return
+
+        if isinstance(statement, ast.ReturnStatement):
+            value = None
+            if statement.value is not None:
+                value = self._evaluate(statement.value)
+
+            raise ReturnSignal(value)
 
         raise ElizRuntimeError(
             f"Unsupported statement: {type(statement).__name__}"
