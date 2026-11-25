@@ -9,7 +9,7 @@ A custom programming language combining Java &amp; Python
 ## To-Do List
 
 **Language features:**
-- [ ] Function declarations with fn, parameters, and return values
+- [x] Function declarations with fn, parameters, and return values
 - [ ] Class declarations and methods
 - [ ] Object creation with new ClassName()
 - [ ] Constructors using init()
@@ -19,7 +19,7 @@ A custom programming language combining Java &amp; Python
 - [x] else if branches
 - [ ] Correct short-circuit behavior for and/or
 - [ ] Consistent type checking for assignments and function arguments
-- [ ] Return-value handling and errors for invalid function calls
+- [x] Return-value handling and errors for invalid function calls
 
 **Project and module system:**
 - [ ] Read main from eliz.json and launch the configured entry point
